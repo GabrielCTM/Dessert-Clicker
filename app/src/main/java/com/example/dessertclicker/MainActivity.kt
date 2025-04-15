@@ -71,6 +71,7 @@ import androidx.core.content.ContextCompat
 import com.example.dessertclicker.data.Datasource
 import com.example.dessertclicker.model.Dessert
 import com.example.dessertclicker.ui.theme.DessertClickerTheme
+import android.net.Uri
 
 // Tag for logging
 private const val TAG = "MainActivity"
@@ -152,19 +153,19 @@ fun determineDessertToShow(
  * Share desserts sold information using ACTION_SEND intent
  */
 private fun shareSoldDessertsInformation(intentContext: Context, dessertsSold: Int, revenue: Int) {
-    val sendIntent = Intent().apply {
-        action = Intent.ACTION_SEND
+    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "message/rfc822"  // Filtra para clientes de correo
+        putExtra(Intent.EXTRA_EMAIL, arrayOf(""))  // Puedes agregar un destinatario si lo deseas
+        putExtra(Intent.EXTRA_SUBJECT, "Reporte de ventas de postres")
         putExtra(
             Intent.EXTRA_TEXT,
             intentContext.getString(R.string.share_text, dessertsSold, revenue)
         )
-        type = "text/plain"
+        setPackage("com.google.android.gm")  // Especifica que se use Gmail
     }
 
-    val shareIntent = Intent.createChooser(sendIntent, null)
-
     try {
-        ContextCompat.startActivity(intentContext, shareIntent, null)
+        ContextCompat.startActivity(intentContext, sendIntent, null)
     } catch (e: ActivityNotFoundException) {
         Toast.makeText(
             intentContext,
